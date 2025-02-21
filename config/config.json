@@ -7,9 +7,17 @@
     "data_dir" : "../data/",
     "path_figures": "../figures/",
 
-    "n_estimators" : 117,
-    "criterion": "log_loss",
-    "max_depth":"30",
-    "min_samples_leaf" : "2",
-    "threshold_opt" : "0.4"
+    "//": "Callbacks parameters",
+    "model_name":"Model_voice",
+    "cooldown_epochs":1,
+    "lr":1e-4,
+    "reduce_patience":10,
+    "stop_patience":150,
+    "monitor":"val_accuracy",
+    "verbose":1,
+    "mode":"max",
+    "save_weights_only":true, 
+    "save_best_only": true,
+    "restore_best_weights": true,
+    "factor": 0.9
 }
