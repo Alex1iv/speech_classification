@@ -8,16 +8,19 @@
     "path_figures": "../figures/",
 
     "//": "Callbacks parameters",
-    "model_name":"Model_voice",
-    "cooldown_epochs":1,
-    "lr":1e-4,
-    "reduce_patience":10,
-    "stop_patience":150,
-    "monitor":"val_accuracy",
-    "verbose":1,
-    "mode":"max",
-    "save_weights_only":true, 
-    "save_best_only": true,
-    "restore_best_weights": true,
-    "factor": 0.9
+    "callbacks":{
+        "model_name":"Model_voice",
+        "cooldown_epochs":1,
+        "lr":1e-4,
+        "reduce_patience":10,
+        "stop_patience":150,
+        "monitor":"val_accuracy",
+        "verbose":1,
+        "mode":"max",
+        "save_weights_only":true, 
+        "save_best_only": true,
+        "restore_best_weights": true,
+        "factor": 0.9
+    }
+
 }
