@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
+#from TensorFlow.keras.callbacks import History
 
-def plot_history(history:tf.keras.callbacks.History, plot_counter:int=None):
+def plot_history(history, plot_counter:int=None):
     """Visualization of the model trainin process
 
     Args:
