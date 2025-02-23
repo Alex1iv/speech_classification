@@ -1,12 +1,13 @@
 import os
 import tensorflow as tf
-#from tensorflow import keras
-#from tf.keras.models import Model
-from tf.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
-from tf.keras.layers import  Dense, Input
-from tf.keras.optimizers import Adam
-from tf.keras import layers
+from tensorflow import keras
+
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
+# from tf.keras.layers import  Dense, Input
+# from tf.keras.optimizers import Adam
+# from tf.keras import layers
 #from tf.keras.models import Sequential, load_model
+#from tf.keras.models import Model
 
 class ModelVoice(tf.keras.Model):
     def __init__(self, **kwargs):
