@@ -1,20 +1,20 @@
 import os
-import tensorflow as tf
-from tensorflow import keras
 
+from tensorflow import keras
+import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras import layers
 # from tf.keras.layers import  Dense, Input
 # from tf.keras.optimizers import Adam
-# from tf.keras import layers
-#from tf.keras.models import Sequential, load_model
-#from tf.keras.models import Model
+# from tf.keras.models import Sequential, load_model
+# from tf.keras.models import Model
 
 class ModelVoice(tf.keras.Model):
-    def __init__(self, **kwargs):
+    def __init__(self, data, **kwargs):
         super(ModelVoice, self).__init__(**kwargs)
         self.d1 = layers.Resizing(32, 32, name='Resizing')
         self.d2 = layers.Normalization(name='Normalization')
-        self.d2.adapt(data=train_spectrogram_ds.map(map_func=lambda spec, label: spec))
+        self.d2.adapt(data=data.map(map_func=lambda spec, label: spec))
         self.d3 = layers.Conv2D(32, 3, activation='relu', name='Convol_1')
         self.d4 = layers.Conv2D(64, 3, activation='relu', name='Convol_2')
         self.d5 = layers.MaxPooling2D(name='MaxPooling2D')
