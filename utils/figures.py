@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 #from TensorFlow.keras.callbacks import History
 
-def plot_history(history, plot_counter:int=None):
+def plot_history(history, path_figures:str='../figures/', plot_counter:int=None):
     """Visualization of the model trainin process
 
     Args:
         history (_tf.keras.callbacks.History_): learnig history of the model
-        plot_counter (int, optional): the image number. Defaults to None.
+        path_figures (str, optional): path to the image folder. Defaults to '../figures/'.
+        plot_counter (int, optional): image number. Defaults to None.
     """
     
     #f1_sc = history.history['f1']
