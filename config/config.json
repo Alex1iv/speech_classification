@@ -3,7 +3,7 @@
     "random_seed" : 42,
 
     "//": "Model folder",
-    "model_path" : "../models/",
+    "path_models" : "../models/",
     "data_dir" : "../data/",
     "path_figures": "../figures/",
 
@@ -15,7 +15,7 @@
         "reduce_patience":10,
         "stop_patience":150,
         "monitor":"val_accuracy",
-        "verbose":1,
+        "verbose":0,
         "mode":"max",
         "save_weights_only":true, 
         "save_best_only": true,
