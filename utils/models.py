@@ -4,33 +4,32 @@ from tensorflow import keras
 import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 from tensorflow.keras import layers
-# from tf.keras.layers import  Dense, Input
-# from tf.keras.optimizers import Adam
-# from tf.keras.models import Sequential, load_model
-# from tf.keras.models import Model
+
 
 class ModelVoice(tf.keras.Model):
-    def __init__(self, data, **kwargs):
-        super(ModelVoice, self).__init__(**kwargs)
+    def __init__(self, data, output_units=30, **kwargs):#mean, variance
+        super(ModelVoice, self).__init__( **kwargs)
+        #self.mean = mean
+        #self.variance = variance
+        self.output_units = output_units
         self.d1 = layers.Resizing(32, 32, name='Resizing')
-        self.d2 = layers.Normalization(name='Normalization')
-        self.d2.adapt(data=data.map(map_func=lambda spec, label: spec))
+        self.d2 = layers.Normalization(
+            #mean=self.mean, 
+            #variance=self.variance,
+            name='Normalization')
+        self.d2.adapt(data=data.map(map_func=lambda spec, label: spec))  # for tensorflow
+        #self.d2.adapt(data=data)                                        # for NumPy
         self.d3 = layers.Conv2D(32, 3, activation='relu', name='Convol_1')
         self.d4 = layers.Conv2D(64, 3, activation='relu', name='Convol_2')
         self.d5 = layers.MaxPooling2D(name='MaxPooling2D')
-        #self.Dropout_1 = layers.Dropout(0.25, name='Dropout_0.25')
         self.d6 = layers.Dropout(0.25, name='Dropout_0.25')
         self.d7 = layers.Flatten(name='Flatten')
         self.d8 = layers.Dense(128, activation='relu', name='Dense_128')
         self.d9 = layers.Dropout(0.5, name='Dropout_0.5')
-        self.output_channel = layers.Dense(units=31, name='Dense_31')
+        self.output_channel = layers.Dense(units=self.output_units, name='Dense_31')
 
     def call(self, inputs, training=False): #, training=False
-        #print('initial: ', inputs.shape)
-        #x = self.d7(x)
-        #print('next: ', x.shape)
         x = self.d1(inputs)
-        #print('After resizing: ', x.shape)
         x = self.d2(x)
         x = self.d3(x) 
         x = self.d4(x) 
@@ -44,7 +43,9 @@ class ModelVoice(tf.keras.Model):
         #print('Output: ', x.shape)
         return x
         #print(f"input_shape = {(self.n_timesteps, self.n_channels)} | output_units = {self.output_channels.shape}")
-
+    
+    # def get_model():
+    #     return ModelVoice(name='ModelVoice')
 
 def callbacks(model_name:str, path_models:str,
     reduce_patience:int,
@@ -114,3 +115,43 @@ def callbacks(model_name:str, path_models:str,
     # )
 
     return [checkpoint, earlystop, reduce_lr] 
+
+# class ModelVoice_2(tf.keras.Model):
+#     def __init__(self, data, **kwargs):
+#         super(ModelVoice, self).__init__(**kwargs)
+#         #self.d1 = layers.Resizing(32, 32, name='Resizing')
+#         #self.d2 = layers.Normalization(name='Normalization')
+#         #self.d2.adapt(data=data.map(map_func=lambda spec, label: spec))
+#         self.d1 = layers.Conv2D(64, [7,3], activation='relu', name='Convol_1')
+#         self.d2 = layers.MaxPooling2D([1,3], name='MaxPooling2D_1_3')
+#         self.d3 = layers.Conv2D(128, [1,7], activation='relu', name='Convol_2')
+#         self.d4 = layers.MaxPooling2D([1,4], name='MaxPooling2D_1_4')
+#         #self.Dropout_1 = layers.Dropout(0.25, name='Dropout_0.25')
+#         self.d5 = layers.Conv2D(256, [1,10], padding="VALID", activation='relu', name='Convol_3')
+#         self.d6 = layers.Conv2D(512, [7,1], activation='relu', name='Convol_6')
+        
+#         self.d6 = layers.Dropout(0.25, name='Dropout_0.25')
+#         self.d7 = layers.Flatten(name='Flatten')
+#         self.d8 = layers.Dense(128, activation='relu', name='Dense_128')
+#         self.d9 = layers.Dropout(0.5, name='Dropout_0.5')
+#         self.output_channel = layers.Dense(units=31, name='Dense_31')
+
+#     def call(self, inputs, training=False): #, training=False
+#         #print('initial: ', inputs.shape)
+#         #x = self.d7(x)
+#         #print('next: ', x.shape)
+#         x = self.d1(inputs)
+#         #print('After resizing: ', x.shape)
+#         x = self.d2(x)
+#         x = self.d3(x) 
+#         x = self.d4(x) 
+#         x = self.d5(x) 
+#         x = self.d6(x)
+#         #x = self.Dropout_1(x, training=training)
+#         x = self.d7(x) 
+#         x = self.d8(x) 
+#         x = self.d9(x)
+#         x = self.output_channel(x)
+#         #print('Output: ', x.shape)
+#         return x
+#         #print(f"input_shape = {(self.n_timesteps, self.n_channels)} | output_units = {self.output_channels.shape}")
