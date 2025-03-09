@@ -27,8 +27,23 @@ The main goal of this assignment was to create a simple speech detector that cap
 
 The dataset was loaded using the `audio_dataset_from_directory` method from Keras. This function generates two batched subsets: training (80%) and validation (20%). Additionally, it trims all audio files to a specified duration. The output format is `[batch_size, sequence_length, num_channels]`. Since all audio files contain a single channel (num_channels=1), this redundant axis was removed using the `tf.squeeze` method. To improve model training, the validation dataset was further split into two subsets: validation and test. Each subset consists of wave signals, as shown fig.1.
 
-<p align="center"> <img src="figures/fig_13.png" width="800" height="350"> 
+<p align="center"> <img src="figures/fig_1.png" width="800" height="250"> 
 </p>
+
+Here is an instance of 'on' command:
+<p align="center" ; margin-left= "auto"; margin-right= "auto" > 
+<video controls="" autoplay="" name="media" height="100">
+    <source src="data_example\00b01445_nohash_0.wav" type="audio/mp3" >
+</video></p>
+
+
+The waveforms in the dataset are represented in the time domain. Next, they were converted from the time-domain signals into the time-*frequency*-domain signals ([or spectrograms](https://en.wikipedia.org/wiki/Spectrogram)) by computing the [short-time Fourier transform (STFT)](https://en.wikipedia.org/wiki/Short-time_Fourier_transform). 
+
+The Short-Time Fourier Transform (STFT) is a technique used to analyze the frequency content of a non-stationary signal over time. It works by dividing the signal into small, overlapping segments (windows) and computing the Fourier Transform for each segment separately. This results in a time-frequency representation, where each point in the spectrogram indicates the presence and intensity of specific frequencies at a given time. The choice of window size affects the trade-off between time and frequency resolution. The method returns a 2D tensor.
+
+<p align="center"> <img src="figures/fig_2.png" width="600" height="500"> 
+</p>
+
 
 ## Results
 
