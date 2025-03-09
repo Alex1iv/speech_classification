@@ -27,7 +27,7 @@ The main goal of this assignment was to create a simple speech detector that cap
 
 The dataset was loaded using the `audio_dataset_from_directory` method from Keras. This function generates two batched subsets: training (80%) and validation (20%). Additionally, it trims all audio files to a specified duration. The output format is `[batch_size, sequence_length, num_channels]`. Since all audio files contain a single channel (num_channels=1), this redundant axis was removed using the `tf.squeeze` method. To improve model training, the validation dataset was further split into two subsets: validation and test. Each subset consists of wave signals, as shown fig.1.
 
-<p align="center"> <img src="figures/fig_3.png" width="800" height="350"> 
+<p align="center"> <img src="figures/fig_13.png" width="800" height="350"> 
 </p>
 
 ## Results
