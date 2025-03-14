@@ -15,7 +15,7 @@ Voice analysis, a modern machine learning task, has been actively studied over t
 
 Despite the fact that the voice-to-text problem has been largely solved, multiple related challenges remain. For example, recognizing different accents, filtering noise efficiently, and improving real-time processing are still areas of ongoing research. Google Assistant supports approximately 40 languages, whereas Yandex Alice is available only in Russian. This highlights gaps that still need to be addressed.
 
-This project focuses on one of the fundamental tasks of audio analysis: recognizing 11 distinct spoken commands while distinguishing them from other words and background noise. The task is based on two sources: the [Simple audio recognition: Recognizing keywords](https://www.tensorflow.org/tutorials/audio/simple_audio#import_the_mini_speech_commands_dataset)tutorial from TensorFlow and the TensorFlow Speech Recognition Challenge](https://www.kaggle.com/competitions/tensorflow-speech-recognition-challenge/overview), which was hosted by Google Brain on the Kaggle platform in early 2018.
+This project focuses on one of the fundamental tasks of audio analysis: recognizing 11 distinct spoken commands while distinguishing them from other words and background noise. The task is based on two sources: the [Simple audio recognition: Recognizing keywords](https://www.tensorflow.org/tutorials/audio/simple_audio#import_the_mini_speech_commands_dataset) tutorial from TensorFlow and the [TensorFlow Speech Recognition Challenge](https://www.kaggle.com/competitions/tensorflow-speech-recognition-challenge/overview), which was hosted by Google Brain on the Kaggle platform in early 2018.
 
 ## Data and methods
 
@@ -36,7 +36,6 @@ Here is an instance of 'on' command:
     <source src="data_example\00b01445_nohash_0.wav" type="audio/mp3" >
 </video></p>
 
-
 The waveforms in the dataset are represented in the time domain. Next, they were converted from the time-domain signals into the time-*frequency*-domain signals ([or spectrograms](https://en.wikipedia.org/wiki/Spectrogram)) by computing the [short-time Fourier transform (STFT)](https://en.wikipedia.org/wiki/Short-time_Fourier_transform). 
 
 The Short-Time Fourier Transform (STFT) is a technique used to analyze the frequency content of a non-stationary signal over time. It works by dividing the signal into small, overlapping segments (windows) and computing the Fourier Transform for each segment separately. This results in a time-frequency representation, where each point in the spectrogram indicates the presence and intensity of specific frequencies at a given time. The choice of window size affects the trade-off between time and frequency resolution. The method returns a 2D tensor.
@@ -46,6 +45,12 @@ The Short-Time Fourier Transform (STFT) is a technique used to analyze the frequ
 
 
 ## Results
+
+After 40 epochs of training, the model reached loss of 0.93 and accuracy 0.74. These metrics reflects a score of 0.712 on the leaderboard.
+
+<p align="center"> <img src="figures/fig_3.png" width="600" > 
+</p>
+
 
 ## Installation
 
