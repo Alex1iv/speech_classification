@@ -3,9 +3,9 @@
     "random_seed" : 42,
 
     "//": "Model folder",
-    "path_models" : "../models/",
-    "data_dir" : "../data/",
-    "path_figures": "../figures/",
+    "path_models" : "./models/",
+    "path_data" : "./data/",
+    "path_figures": "./figures/",
 
     "//": "Callbacks parameters",
     "callbacks":{
