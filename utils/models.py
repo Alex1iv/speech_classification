@@ -2,7 +2,7 @@ import os
 
 from tensorflow import keras
 import tensorflow as tf
-from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau, BackupAndRestore
 from tensorflow.keras import layers, models
 
 def callbacks(model_name:str, path_models:str,
@@ -65,93 +65,97 @@ def callbacks(model_name:str, path_models:str,
         mode=mode,
         verbose=verbose        
     )
-
+    
+    backup = BackupAndRestore(
+        # The path where your backups will be saved. Make sure the
+        # directory exists prior to invoking `fit`.
+        os.path.join(path_models),
+        # How often you wish to save a checkpoint. Providing "epoch"
+        # saves every epoch, providing integer n will save every n steps.
+        save_freq="epoch",
+        # Deletes the last checkpoint when saving a new one.
+        delete_checkpoint=True,
+    )
     # # reduces learnign rate smoothly
     # scheduler = LearningRateScheduler(
     #     schedule=smooth_decay(epoch, lr), 
     #     verbose=config.callbacks.verbose
     # )
 
-    return [checkpoint, earlystop, reduce_lr] 
+    return [checkpoint, earlystop, reduce_lr, backup] 
+
+def compute_mean_variance(dataset):
+    """Compute mean & variance using tf.data.experimental.reduce() for efficiency."""
+    def update_stats(state, batch):
+        spec, _ = batch
+        batch_mean, batch_var = tf.nn.moments(spec, axes=[0])
+        batch_size = tf.shape(spec)[0]
+
+        # Unpack state
+        count, mean, M2 = state
+
+        # Welford’s online update
+        delta = batch_mean - mean
+        new_count = count + tf.cast(batch_size, tf.float32)
+        new_mean = mean + delta * (tf.cast(batch_size, tf.float32) / new_count)
+        new_M2 = M2 + batch_var * tf.cast(batch_size, tf.float32)
+
+        return new_count, new_mean, new_M2
+
+    # Initialize state
+    initial_state = (tf.constant(0, dtype=tf.float32),  
+                     tf.zeros((124, 129, 1), dtype=tf.float32),  
+                     tf.zeros((124, 129, 1), dtype=tf.float32))  
+
+    # Compute mean & variance over dataset
+    count, mean, M2 = dataset.reduce(initial_state, update_stats)
+
+    variance = M2 / count
+    return mean, variance
 
 
-class ModelVoice_v0(tf.keras.Model):
-    def __init__(self, data, output_units=30, **kwargs):
-        super(ModelVoice_v0, self).__init__( **kwargs)
-
-        # Feature extraction
-        self.feature_extractor = models.Sequential([
-            layers.Resizing(32, 32, name='Resizing'),
-            layers.Conv2D(32, (3, 3), activation='relu', padding="same", name='Conv2D_1'),
-            layers.Conv2D(64, (3, 3), activation='relu', padding="same", name='Conv2D_2'),
-            layers.MaxPooling2D(pool_size=(2, 2), name='MaxPool2D_1'),
-            layers.Dropout(0.25, name='Dropout_1')
-        ], name="FeatureExtractor")
-
-        # Flattening & Fully Connected Layers
-        self.classifier = models.Sequential([
-            layers.Flatten(name='Flatten'),
-            layers.Dense(128, activation='relu', name='Dense_128'),
-            layers.Dropout(0.5, name='Dropout_2'),
-            layers.Dense(output_units, name='Output')
-        ], name="Classifier")
-
-        # Normalization layer adapted to dataset
-        self.norm_layer = layers.Normalization(name='Normalization')
-        self.norm_layer.adapt(data.map(lambda spec, label: spec))
-
-    def call(self, inputs, training=False):
-        x = self.norm_layer(inputs)
-        x = self.feature_extractor(x, training=training)
-        x = self.classifier(x, training=training)
-        return x
-    #     self.output_units = output_units
-    #     self.d1 = layers.Resizing(32, 32, name='Resizing')
-    #     self.d2 = layers.Normalization(
-    #         #mean=self.mean, 
-    #         #variance=self.variance,
-    #         name='Normalization')
-    #     self.d2.adapt(data=data.map(map_func=lambda spec, label: spec))  # for tensorflow
-    #     #self.d2.adapt(data=data)                                        # for NumPy
-    #     self.d3 = layers.Conv2D(32, 3, activation='relu', name='Convol_1')
-    #     self.d4 = layers.Conv2D(64, 3, activation='relu', name='Convol_2')
-    #     self.d5 = layers.MaxPooling2D(name='MaxPooling2D')
-    #     self.d6 = layers.Dropout(0.25, name='Dropout_0.25')
-    #     self.d7 = layers.Flatten(name='Flatten')
-    #     self.d8 = layers.Dense(128, activation='relu', name='Dense_128')
-    #     self.d9 = layers.Dropout(0.5, name='Dropout_0.5')
-    #     self.output_channel = layers.Dense(units=self.output_units, name='Dense_31')
-
-    # def call(self, inputs, training=False): #, training=False
-    #     x = self.d1(inputs)
-    #     x = self.d2(x)
-    #     x = self.d3(x) 
-    #     x = self.d4(x) 
-    #     x = self.d5(x) 
-    #     x = self.d6(x)
-    #     #x = self.Dropout_1(x, training=training)
-    #     x = self.d7(x) 
-    #     x = self.d8(x) 
-    #     x = self.d9(x)
-    #     x = self.output_channel(x)
-        #print('Output: ', x.shape)
-        # return x
-        #print(f"input_shape = {(self.n_timesteps, self.n_channels)} | output_units = {self.output_channels.shape}")
+def normalize_dataset(dataset, mean, variance):
+    """Normalize dataset using precomputed mean & variance (optimized version)."""
     
-    # def get_model():
-    #     return ModelVoice(name='ModelVoice')
+    return dataset.map(lambda spec, label: ((spec - mean) / tf.sqrt(variance), label))
 
-def normalize_dataset(dataset):
-    """Compute mean & variance and normalize the dataset."""
-    # Extract features only (discard labels)
-    data_only = dataset.map(lambda spec, label: spec)
 
-    # Compute mean & variance efficiently
-    data_tensor = tf.concat(list(data_only), axis=0)
-    mean, var = tf.nn.moments(data_tensor, axes=[0])
 
-    # apply normalization
-    return dataset.map(lambda spec, label: ((spec - mean) / tf.sqrt(var), label))
+# def normalize_dataset(dataset):
+#     """Compute mean & variance and normalize the dataset."""
+#     # Extract features only (discard labels)
+#     data_only = dataset.map(lambda spec, label: spec)
+
+#     # Compute mean & variance
+#     data_tensor = tf.concat(list(data_only), axis=0)
+#     mean, var = tf.nn.moments(data_tensor, axes=[0])
+
+#     # apply normalization
+#     return dataset.map(lambda spec, label: ((spec - mean) / tf.sqrt(var), label))
+
+
+# def normalize_dataset(dataset):
+#     """Compute mean & variance efficiently and normalize the dataset in a single pass."""
+#     count = 0
+#     mean = 0.0
+#     M2 = 0.0  # Variance accumulator
+
+#     # Compute mean & variance
+#     for spec, _ in dataset:
+#         batch_size = tf.shape(spec)[0]
+#         batch_mean, batch_var = tf.nn.moments(spec, axes=[0])
+
+#         # Welford’s algorithm for running mean & variance
+#         delta = batch_mean - mean
+#         new_count = count + batch_size
+#         mean += delta * tf.cast(batch_size, tf.float32) / tf.cast(new_count, tf.float32)
+#         M2 += batch_var * tf.cast(batch_size, tf.float32)  # Variance accumulator
+#         count = new_count
+
+#     variance = M2 / tf.cast(count, tf.float32)
+
+#     # Normalize dataset using computed mean & variance
+#     return dataset.map(lambda spec, label: ((spec - mean) / tf.sqrt(variance), label))
 
 class ModelVoice_v1(tf.keras.Model):
     def __init__(self, output_units:int=31, **kwargs):
@@ -207,7 +211,42 @@ class ModelVoice_v2(tf.keras.Model):
                 x = layer(x)
         return x
     
+# class ModelVoice_v0(tf.keras.Model):
+#     def __init__(self, data, output_units=30, **kwargs):
+#         super(ModelVoice_v0, self).__init__( **kwargs)
 
+#         # Feature extraction
+#         self.feature_extractor = models.Sequential([
+#             layers.Resizing(32, 32, name='Resizing'),
+#             layers.Conv2D(32, (3, 3), activation='relu', padding="same", name='Conv2D_1'),
+#             layers.Conv2D(64, (3, 3), activation='relu', padding="same", name='Conv2D_2'),
+#             layers.MaxPooling2D(pool_size=(2, 2), name='MaxPool2D_1'),
+#             layers.Dropout(0.25, name='Dropout_1')
+#         ], name="FeatureExtractor")
+
+#         # Flattening & Fully Connected Layers
+#         self.classifier = models.Sequential([
+#             layers.Flatten(name='Flatten'),
+#             layers.Dense(128, activation='relu', name='Dense_128'),
+#             layers.Dropout(0.5, name='Dropout_2'),
+#             layers.Dense(output_units, name='Output')
+#         ], name="Classifier")
+
+#         # Normalization layer adapted to dataset
+#         self.norm_layer = layers.Normalization(name='Normalization')
+#         self.norm_layer.adapt(data.map(lambda spec, label: spec))
+
+#     def call(self, inputs, training=False):
+#         x = self.norm_layer(inputs)
+#         x = self.feature_extractor(x, training=training)
+#         x = self.classifier(x, training=training)
+#         return x
+#         #print('Output: ', x.shape)
+#         # return x
+#         #print(f"input_shape = {(self.n_timesteps, self.n_channels)} | output_units = {self.output_channels.shape}")
+    
+#     # def get_model():
+#     #     return ModelVoice(name='ModelVoice')
 
 # class ModelVoice_2(tf.keras.Model):
 #     def __init__(self, data, **kwargs):
