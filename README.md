@@ -3,7 +3,7 @@
 [1. Summary](README.md#Summary)   
 [2. Data and methods](README.md#Data-and-methods)   
 [3. Results](README.md#Results)   
-[4. Installation](README.md#Installation)    
+[4. Installation and Inference](README.md#Installation-and-Inference)    
 [5. Project structure](README.md#Project-structure)
 
 
@@ -52,8 +52,20 @@ After 40 epochs of training, the model reached loss of 0.93 and accuracy 0.74. T
 </p>
 
 
-## Installation
+## Installation and Inference
+1. Clone the repository and install dependencies:
+```Python
+# Clone repository and install requirements
 
+git clone https://Alex1iv/speech_classification
+pip install -r -q requirements.txt
+``` 
+2. Record your voice commands in the .wav format and put them into the `sample_commands folder`.
+
+3. Run the script in console
+```Python
+python inference.py
+```
 
 ## Project structure
 
