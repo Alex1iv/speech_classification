@@ -16,7 +16,7 @@ path_models = config.path_models #'../models/'
 
 # Read test data
 test_df = tf.keras.utils.audio_dataset_from_directory(
-    directory=path_data + 'test/', 
+    directory='./sample_commands/', #path_data + 'test/', 
     labels=None, # no labels are specified
     batch_size=64, 
     shuffle=False, #avoid shuffling
@@ -45,7 +45,7 @@ def apply_stft(audio_batch):
 test_spectrogram = flat_df.map(apply_stft, num_parallel_calls=tf.data.AUTOTUNE)
 
 
-loaded_model = load_model('./models/model_v2.keras')
+loaded_model = load_model('./models/model_v3.keras')
 
 loaded_model.build(input_shape=(None, 124, 129, 1))
 
@@ -58,6 +58,7 @@ loaded_model.compile(
 y_pred = loaded_model.predict(test_spectrogram)
 y_pred = tf.argmax(y_pred, axis=1)
 #print(y_pred, '\nShape is: ',y_pred.shape)
+print(y_pred)
 
 replacement_dict = {
      0:'silence',  1:'unknown',  2:'unknown',  3:'unknown',  4:'unknown',  5:'unknown',
